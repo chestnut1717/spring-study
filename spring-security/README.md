@@ -8,6 +8,7 @@
 - Project : Gradle(Groovy)
 - spring-boot == 3.3.1
 - jjwt == 0.12.3
+- MySQL == 8.0.38
 
 ## Dependencies
 - Lombok
@@ -15,3 +16,8 @@
 - Spring Security
 - Spring Data JPA
 - MySQL Driver
+
+## 세부사항
+- mySQL 계정
+  - id : root
+  - pwd : root
