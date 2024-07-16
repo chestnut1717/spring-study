@@ -1,16 +1,34 @@
 package com.example.springjwt.config;
 
+import com.example.springjwt.jwt.LoginFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final AuthenticationConfiguration authenticationConfiguration;
+
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration) {
+        this.authenticationConfiguration = authenticationConfiguration;
+    }
+
+    // authenticationManager 의존성 주입을 위해 Bean 등록
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
+
+        return configuration.getAuthenticationManager();
+    }
+
     // 패스워드 인코딩을 위한 Bcrypt 암호화 Bean 등록
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -39,6 +57,10 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/", "/join").permitAll() // 해당 경로에서는 모든 권한 허락
                         .requestMatchers("/admin").hasRole("ADMIN") // /admin에서는 ADMIN에서만 접근 가능
                         .anyRequest().authenticated()); // 다른 요청에 대해서는 로그인한 사용자만 접근할 수 있게
+
+        http
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
+
 
         // JWT를 통한 인증/인가를 위해서 세션을 STATELESS 상태로 설정하는 것이 중요하다.
         http
